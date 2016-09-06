@@ -1,1 +1,3 @@
 # Awareness-RSA
+
+Rational Speech-Act (RSA) models for speakers sending uninformative messages with addressees who exhibit unawareness. AwarenessRSA.py has an implementation of the model presented at the [2016 NASSLLI student session](http://www.stanford.edu/~pcrone/Documents/NASSLLI-Presentation.pdf). AwarenessRSAGraphs.py uses [matplotlib](http://matplotlib.org) to produce graphs showing the likelihood that a pragmatic speaker would send various messages given different assumptions about the listener.
