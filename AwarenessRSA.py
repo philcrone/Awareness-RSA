@@ -481,7 +481,7 @@ def main(argv):
 		print 'Literal speaker posteriors over messages:'
 		print speaker_0.get_posteriors()
  	elif agent == 'l1':
- 		if la > 0.5:
+ 		if la >= 0.5:
  			la = 'aware'
  		else:
  			la = 'unaware'
