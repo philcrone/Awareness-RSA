@@ -1,6 +1,7 @@
 import sys
 import getopt
 import pickle
+import itertools
 import numpy as np
 import AwarenessRSA as arsa
 import scipy.stats as stats
