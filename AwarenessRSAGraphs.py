@@ -41,14 +41,14 @@ def get_values(filename = None):
 						listener = listener_1 )
 		for i in xrange(0,10):
 			speaker_1.compute_posteriors()
-			pos = speaker_1.get_posteriors()
+			local_pos = speaker_1.get_posteriors()
 			if pair in pos.keys():
 				for key in pos[pair]:
-					pos[pair][key] += pos[key]
+					pos[pair][key] += local_pos[key]
 			else:
-				pos[pair] = pos
+				pos[pair] = local_pos
 	
-		pos[pair] = normalize(pos[pair])
+		pos[pair] = arsa.normalize(pos[pair])
 	
 	pickle.dump(pos,file)
 
