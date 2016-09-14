@@ -491,11 +491,11 @@ def main(argv):
 						awareness = la,
 						speaker = None,
 						quick_speaker = True )
-		listener_1.compute_posteriors()
 		print 'Pragmatic listener posteriors over worlds given each message:'
 		for m in messages:
 			print m.get_name()
-			print listener_1.get_posteriors(m.get_name()) 
+			listener_1.compute_posteriors(m)
+			print listener_1.get_posteriors()
  	elif agent == 's1':
  		listener_1 = Listener(	priors = {	'worlds':np.array([lb,1-lb]),
 									'speaker-worlds':stats.uniform(),
