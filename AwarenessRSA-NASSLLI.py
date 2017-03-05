@@ -9,7 +9,7 @@ import pp
 import pickle
 import inspect
 import scipy.stats as stats
-from scipy.linalg import norm 
+from scipy.linalg import norm
 from sklearn.preprocessing import normalize
 from sklearn.utils.extmath import cartesian
 
@@ -26,8 +26,8 @@ of p/attending to p or not being aware/not attending to p.
 
 belief_threshold = 0.85
 """
-Threshold relevant for evaluating uninformative messages, e.g. 'As you know, p.' Such 
-messages will be true so long as p is true and subjective probability assigned to p by 
+Threshold relevant for evaluating uninformative messages, e.g. 'As you know, p.' Such
+messages will be true so long as p is true and subjective probability assigned to p by
 listener exceeds the above threshold.
 """
 
@@ -47,19 +47,19 @@ class Message:
 		self.name = name
 		self.sem = sem
 		self.cost = cost
-	
+
 	def get_name(self):
 		return self.name
-	
+
 	def get_sem(self):
 		return self.sem
-		
+
 	def get_cost(self):
 		return self.cost
-		
+
 	def set_cost(self, c):
 		self.cost = c
-		
+
 p = Message(name = 'p',sem = lambda w, l: 1 if w in ['w1'] else 0, cost=.2)
 
 """
@@ -88,19 +88,19 @@ relevant treshold and has cost of 0.4.
 uninform_not_p = Message(name = 'uninform-not-p', sem = lambda w, l: 1 if w in ['w2'] and l > belief_threshold else 0, cost = .4)
 
 """
-Message uninform-not-p is true in w2 if the listener's subjective belief in w2 exceeds 
+Message uninform-not-p is true in w2 if the listener's subjective belief in w2 exceeds
 the relevant treshold and has cost of 0.4.
 """
 
 messages = np.array([p,not_p,null,uninform_p,uninform_not_p])
-		
+
 def normalize(dict):
 	"""
 	Function to normalize a dict. Output is a dictionary with the same keys as the
 	input, but values sum to 1.
 	"""
 	return {i: j / sum(dict.values()) for i, j in dict.items()}
-	
+
 def params(mu,var):
 	"""
 	Function to generate parameters for a beta distribution given mean and variance.
@@ -108,23 +108,23 @@ def params(mu,var):
 	alpha = ((1 - mu) / var - 1 / mu) * mu ** 2
 	beta = alpha * (1 / mu - 1)
 	return alpha, beta
-	
+
 def hellinger(p, q):
 	"""
-	Function to calculate the Hellinger distance between two discrete probability 
+	Function to calculate the Hellinger distance between two discrete probability
 	distributions. Hellinger distance is the only distance between two probability
 	distributions used in this model, but in principle other measures could be used.
 	"""
 	return norm(np.sqrt(p) - np.sqrt(q)) / np.sqrt(2)
-    
+
 def quick_literal_speaker(speaker_beliefs, listener_beliefs):
 	"""
-	Rather than build a full Speaker object to simulate a literal speaker, this 
+	Rather than build a full Speaker object to simulate a literal speaker, this
 	function serves as a faster way to get a literal speaker's posterior distribution over
 	messages. Inputs should be a numeric value representing the speaker's subjective
-	probability of w1 and a probability distribution (a stats.rv_continuous object) 
+	probability of w1 and a probability distribution (a stats.rv_continuous object)
 	representing the speaker's beliefs about the listener's subjective probability of w1.
-	""" 
+	"""
 	posteriors = {	'p':speaker_beliefs,
 					'not-p':1-speaker_beliefs,
 					'null':1,
@@ -132,7 +132,7 @@ def quick_literal_speaker(speaker_beliefs, listener_beliefs):
 					'uninform-not-p': (1-speaker_beliefs) * (1 - listener_beliefs.cdf(1 - belief_threshold))}
 	posteriors = normalize(posteriors)
 	return posteriors
-    
+
 beta_dists = {}
 for val in np.arange(0.05,1,0.05):
 	beta_dists[val] = stats.beta(*params(val,0.01))
@@ -142,7 +142,7 @@ Generate beta distributions with means ranging from 0.05 to 0.95 with variance 0
 will be used by listeners and speakers below, and it's more efficient to pre-generate
 these distributions than generate them as needed.
 """
-	
+
 quick_pos = {}
 grid = np.arange(0.05,1,0.05)
 for m in messages:
@@ -151,7 +151,7 @@ for m in messages:
 		quick_pos[m.get_name()][pair] = quick_literal_speaker(pair[0],beta_dists[pair[1]])[m.get_name()]
 
 """
-Generate posteriors over messages for different literal speakers. In particular, we 
+Generate posteriors over messages for different literal speakers. In particular, we
 generate literal speakers whose subjective probability of w1 can take any value in
 [0.05,0.95] in 0.05 increments and whose beliefs about the listener's subjective
 probability of w1 are given by a beta distribution with variance 0.01 and whose mean can
@@ -159,9 +159,9 @@ take any value [0.05,0.95] in 0.05 increments.
 """
 
 class Listener:
-	def __init__(self, 
-			priors = None, 
-			awareness = None, 
+	def __init__(self,
+			priors = None,
+			awareness = None,
 			speaker = None,
 			quick_speaker=False):
 		"""
@@ -176,25 +176,25 @@ class Listener:
 		self.speaker = speaker
 		self.quick_speaker = quick_speaker
 		self.posteriors = self.priors
-		
+
 	def get_priors(self):
 		return self.priors
-		
+
 	def get_awareness(self):
 		return self.awareness
-		
+
 	def get_speaker(self):
 		return self.speaker
 
 	def get_posteriors(self):
 		return self.posteriors
-		
+
 	def set_priors(self,priors):
 		self.priors = priors
-		
+
 	def set_awareness(self,awareness):
 		self.awareness = awareness
-		
+
 	def compute_posteriors(self, m):
 		"""
 		Calculate posterior beliefs given a message m.
@@ -206,16 +206,16 @@ class Listener:
 			"""
 			if not self.quick_speaker and self.speaker.get_listener():
 				"""
-				Currently not implemented: pragmatic listener that reasons about a 
+				Currently not implemented: pragmatic listener that reasons about a
 				pragmatic speaker.
 				"""
-				pass			
+				pass
 			else:
 				if m != null:
 					"""
-					Listener only does pragmatic reasoning if the message is not null. 
-					This condition can be changed if we'd like to make alternative 
-					assumptions. For example, we could have the listener do pragmatic 
+					Listener only does pragmatic reasoning if the message is not null.
+					This condition can be changed if we'd like to make alternative
+					assumptions. For example, we could have the listener do pragmatic
 					reasoning unless the message is null AND the listener is unaware.
 					"""
 					grid = np.arange(0.05,1,0.05)
@@ -227,48 +227,48 @@ class Listener:
 			 										'listener-worlds':stats.beta(*params(pair[1],0.01)),
 			 										'listener-awareness':self.speaker.get_priors()['listener-awareness']})
 		 					self.speaker.compute_posteriors()
-		 					self.posteriors[pair] = (self.speaker.get_posteriors()[m.get_name()] * 
+		 					self.posteriors[pair] = (self.speaker.get_posteriors()[m.get_name()] *
 			 									self.priors['speaker-worlds'].pdf(pair[0]) *
 			 									self.priors['speaker-listener-worlds'].pdf(pair[1]))
-			 	
+
 			 		self.posteriors = normalize(self.posteriors)
-			 		
+
 			 		"""
-			 		Above, we simulate literal speakers for a range of values for the 
-			 		speaker's beliefs about the world and the speaker's beliefs about the 
-			 		listeners's beliefs about the world. Find the probability that the 
-			 		speaker would have sent the message m and then normalize across all 
+			 		Above, we simulate literal speakers for a range of values for the
+			 		speaker's beliefs about the world and the speaker's beliefs about the
+			 		listeners's beliefs about the world. Find the probability that the
+			 		speaker would have sent the message m and then normalize across all
 			 		speakers considered.
 			 		"""
-			 		
+
 			 		grid_probs = np.zeros(19)
-			 		
+
 			 		for key in self.posteriors.keys():
 			 			grid_probs[int(key[1]*20 - 1)] += self.posteriors[key]
-			 				
+
 			 		data = np.random.choice(grid,500,p=grid_probs)
-			 		
+
 			 		fitted_params = stats.beta.fit(data,floc=0,fscale=1)
-			 		
+
 			 		"""
 			 		Fit a beta distribution giving the likelihood of the speaker's
 			 		beliefs about the listener's beliefs about the world.
 			 		"""
-			 					 		
+
 			 		speaker_mean = 0.
 			 		for key in self.posteriors.keys():
 			 			speaker_mean += key[0] * self.posteriors[key]
-			 			
+
 			 		"""
 			 		Compute the weighted mean of the speaker's beliefs about the world.
-			 		We assume here that the listener has full confidence in the speaker 
-			 		and will therefore adopt the speaker's beliefs about the world  as the 
+			 		We assume here that the listener has full confidence in the speaker
+			 		and will therefore adopt the speaker's beliefs about the world  as the
 			 		listener's posterior beliefs about the world.
 			 		"""
-			 		
+
 					self.posteriors['worlds'] = [speaker_mean, 1 - speaker_mean]
 			 		self.posteriors['speaker-listener-worlds'] = stats.beta(fitted_params[0],fitted_params[1],loc=0,scale=1)
-			 		
+
 			 		"""
 			 		Update the listener's posteriors posteriors.
 			 		"""
@@ -282,15 +282,15 @@ class Listener:
 		else:
 			"""
 			Currently not implemented: listener listener. Implementing a listener with
-			uninformative messages is non-trivial. Suppose, for example, a speaker sends 
-			the message uninform-p when the listener does not, in fact, believe that p is 
-			the case. The speaker's message is false, which opens the question of whether 
+			uninformative messages is non-trivial. Suppose, for example, a speaker sends
+			the message uninform-p when the listener does not, in fact, believe that p is
+			the case. The speaker's message is false, which opens the question of whether
 			the listener should update at all or update as if the speaker had sent message p.
 			"""
 			pass
-	
+
 class Speaker:
-	def __init__(self, 
+	def __init__(self,
 			priors = None,
 			alpha = None,
 			listener = None):
@@ -303,25 +303,25 @@ class Speaker:
 		self.listener = listener
 		self.utilites = {}
 		self.posteriors = None
-		
+
 	def get_priors(self):
 		return self.priors
-		
+
 	def get_alpha(self):
 		return self.alpha
-		
+
 	def get_listener(self):
 		return self.listener
-		
+
 	def get_utilities(self):
 		return self.utilities
-		
+
 	def get_posteriors(self):
 		return self.posteriors
-		
+
 	def set_priors(self,new_priors):
 		self.priors = new_priors
-	
+
 	def compute_utilities(self):
 		"""
 		Compute the utilities associated with each message. The speaker is assumed to have
@@ -330,12 +330,12 @@ class Speaker:
 		listener.
 		"""
 		utilities = {}
-				
+
 		for m in messages:
 			utilities[m.get_name()] = 0.
 			for a in awareness_states:
 				"""
-				The speaker calculates the utility of each message for each possible 
+				The speaker calculates the utility of each message for each possible
 				awareness state of the listener, then weights these utilites by the
 				subjective probability the speaker assigns to each awareness state.
 				"""
@@ -344,8 +344,8 @@ class Speaker:
 					If the listener is unaware, then the speaker fails to achieve the goal
 					of making the listener aware of p. Here, this failure is represented
 					by a constant, negative value associated with leaving the listener
-					unaware. 
-					
+					unaware.
+
 					Note that in the current implementation, a null message with an
 					unaware listener is not more costly if the listener has false beliefs
 					about the world or about the speaker's beliefs about the listener.
@@ -355,32 +355,32 @@ class Speaker:
 				else:
 					self.listener.set_awareness(a)
 					self.listener.compute_posteriors(m)
-					
+
 					l_posteriors = self.listener.get_posteriors()
 					util = 0.
-			
+
 					self_data = [stats.beta(*params(self.listener.get_priors()['worlds'][0],0.001)).pdf(i * 0.01) for i in xrange(1,100)]
-					listener_data = [l_posteriors['speaker-listener-worlds'].pdf(i * 0.01) for i in xrange(1,100)]	
-					
+					listener_data = [l_posteriors['speaker-listener-worlds'].pdf(i * 0.01) for i in xrange(1,100)]
+
 					"""
 					Above, we generate two discrete probability distributions, the first
 					representing the speaker's beliefs about the listener's beliefs about
 					the world and the second respresenting the listener's beliefs about
 					the speaker's beliefs about the listener's beliefs about the world.
 					"""
-			
+
 					util -= (m.get_cost() + (doxastic_weight * hellinger(self_data,listener_data)))
-					
+
 					"""
-					Subtract from the utility the message cost and the distance between 
+					Subtract from the utility the message cost and the distance between
 					the two discrete probability distributions generated. The distance is
 					weighted by doxastic_weight.
 					"""
-			
+
 					util += informativity_weight * np.log(l_posteriors['worlds'][0]) * self.priors['worlds'][0]
-			
+
 					util += informativity_weight * np.log(l_posteriors['worlds'][1]) * self.priors['worlds'][1]
-					
+
 					"""
 					Add to the utility the log of the listener's posterior beleif in each
 					world given the message m, weighted by the speaker's prior belief in
@@ -390,17 +390,17 @@ class Speaker:
 				if a == 'aware':
 					util *= self.priors['listener-awareness'][0]
 				else:
-					util *= self.priors['listener-awareness'][1] 
-					
+					util *= self.priors['listener-awareness'][1]
+
 				"""
 				Utilities were calculated given each awareness state. We now weight these
 				values by the speaker's prior probability of each awareness state.
 				"""
-									
+
 				utilities[m.get_name()] += util
-		
+
 		self.utilities = utilities
-		
+
 	def compute_posteriors(self):
 		posteriors = {}
 		if self.listener:
@@ -412,31 +412,31 @@ class Speaker:
 			self.compute_utilities()
 			for m in messages:
 				posteriors[m.get_name()] = math.exp(self.alpha * self.utilities[m.get_name()])
-				
-		else: 
+
+		else:
 			"""
 			If the speaker is a literal speaker, posterior probabilities for each message
 			are proportional to the likelihood that the message is true based on the
 			speaker's priors.
 			"""
 			for m in messages:
-				posteriors[m.get_name()] = 	(m.sem('w1',1) * 
-											self.priors['worlds'][0] * 
+				posteriors[m.get_name()] = 	(m.sem('w1',1) *
+											self.priors['worlds'][0] *
 											(1 - self.priors['listener-worlds'].cdf(belief_threshold)) +
-											m.sem('w1',0) * 
-											self.priors['worlds'][0] * 
+											m.sem('w1',0) *
+											self.priors['worlds'][0] *
 											self.priors['listener-worlds'].cdf(belief_threshold) +
-											m.sem('w2',1) * 
-											self.priors['worlds'][1] * 
+											m.sem('w2',1) *
+											self.priors['worlds'][1] *
 											self.priors['listener-worlds'].cdf(1 - belief_threshold) +
-											m.sem('w2',0) * 
-											self.priors['worlds'][1] * 
+											m.sem('w2',0) *
+											self.priors['worlds'][1] *
 											(1 - self.priors['listener-worlds'].cdf(1 - belief_threshold)))
-		
+
 		posteriors = normalize(posteriors)
-			
+
 		self.posteriors = posteriors
-		
+
 def main(argv):
 	agent = 's1'
 	sb = 0.9
@@ -445,11 +445,11 @@ def main(argv):
 	try:
 		opts, args = getopt.getopt(argv,"ha:s:l:w:",["agent=","speaker-belief=","listener-belief=","listener-awareness="])
 	except getopt.GetoptError:
-		print 'Awareness-RSA-NASSLLI.py -a <agent-type> -s <speaker-beliefs> -l <listener-beliefs> -w <listener-awareness>'
+		print 'AwarenessRSA-NASSLLI.py -a <agent-type> -s <speaker-beliefs> -l <listener-beliefs> -w <listener-awareness>'
 		sys.exit(2)
 	for opt, arg in opts:
 		if opt == '-h':
-			print 'Awareness-RSA-NASSLLI.py -a <agent-type> -sb <speaker-beliefs> -lb <listener-beliefs> -la <listener-awareness>'
+			print 'AwarenessRSA-NASSLLI.py -a <agent-type> -sb <speaker-beliefs> -lb <listener-beliefs> -la <listener-awareness>'
 			sys.exit()
 		elif opt in ("-a", "--agent"):
 			agent = arg
@@ -513,7 +513,7 @@ def main(argv):
 		print speaker_1.get_posteriors()
  	else:
  		print "Agent must be either 's0', 'l1', or 's1'."
-	
-	
+
+
 if __name__ == '__main__':
 	main(sys.argv[1:])

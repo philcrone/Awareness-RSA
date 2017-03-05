@@ -3,7 +3,7 @@ import getopt
 import pickle
 import itertools
 import numpy as np
-import AwarenessRSA as arsa
+import AwarenessRSA-NASSLLI as arsa
 import scipy.stats as stats
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
@@ -24,7 +24,7 @@ def get_values(filename = None):
 	if filename:
 		file = open(filename,'w')
 	grid = np.arange(0.05,1,0.05)
-		
+
 	for pair in itertools.product(grid,grid):
 		b = pair[0]
 		a = pair[1]
@@ -47,14 +47,14 @@ def get_values(filename = None):
 					pos[pair][key] += local_pos[key]
 			else:
 				pos[pair] = local_pos
-	
+
 		pos[pair] = arsa.normalize(pos[pair])
-	
+
 	pickle.dump(pos,file)
 
 def make_colormap(seq):
     """
-    Return a LinearSegmentedColormap seq: a sequence of floats and RGB-tuples. The floats 
+    Return a LinearSegmentedColormap seq: a sequence of floats and RGB-tuples. The floats
     should be increasing and in the interval (0,1). Source:
     http://stackoverflow.com/questions/16834861/create-own-colormap-using-matplotlib-and-plot-color-scale.
     """
@@ -71,7 +71,7 @@ def make_colormap(seq):
 
 def diverge_map(high=(0.471, 0.082, 0.082), low=(0.035,0.443,0.698)):
     """
-    Low and high are colors that will be used for the two ends of the spectrum. They can 
+    Low and high are colors that will be used for the two ends of the spectrum. They can
     be either color strings or rgb color tuples. Source:
     http://stackoverflow.com/questions/16834861/create-own-colormap-using-matplotlib-and-plot-color-scale.
     """
@@ -80,14 +80,14 @@ def diverge_map(high=(0.471, 0.082, 0.082), low=(0.035,0.443,0.698)):
     if isinstance(high, basestring): high = c(high)
     return make_colormap([low, c('white'), 0.5, c('white'), high])
 
-def graph(m,filename): 
+def graph(m,filename):
 	"""
 	Produce graphs showing the likelihood of a pragmatic speaker sending message m given
 	different beliefs about listener's beliefs in the world and beliefs about the
 	listener's awareness state. If filename is provided, pickled dictionary at given
 	location will be used.
 	"""
-	
+
 	new_pos = {}
 
 	if filename:
@@ -97,7 +97,7 @@ def graph(m,filename):
 		index1 = key[0]*20 - 1
 		index2 = key[1]*20 - 1
 		new_pos[(index1, index2)] = pos[key]
-		
+
 # 	print new_pos
 
 	fig = plt.figure()
@@ -111,7 +111,7 @@ def graph(m,filename):
 		index1 = pairs[0]*20 - 1
 		index2 = pairs[1]*20 - 1
 		Z[index1][index2] = new_pos[(index1,index2)][m]
-	
+
 	surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=diverge_map(),
 						   linewidth=0, antialiased=False)
 	ax.set_zlim(0, 1.0)
@@ -162,7 +162,7 @@ def main(argv):
 				'Input file must be a pickled dictionary.'
 				sys.exit(2)
 			except KeyError:
-				"Either the input file was not a pickled dictionary or the message was not in the dictionary's keys." 
+				"Either the input file was not a pickled dictionary or the message was not in the dictionary's keys."
 				sys.exit(2)
 		else:
 			graph(m)
@@ -176,7 +176,7 @@ def main(argv):
 			'Input file must be a pickled dictionary.'
 			sys.exit(2)
 		except KeyError:
-			"Either the input file was not a pickled dictionary or the message was not in the dictionary's keys." 
+			"Either the input file was not a pickled dictionary or the message was not in the dictionary's keys."
 			sys.exit(2)
 	else:
 		get_values()
@@ -184,4 +184,3 @@ def main(argv):
 
 if __name__ == '__main__':
 	main(sys.argv[1:])
-
